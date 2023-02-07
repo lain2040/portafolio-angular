@@ -1,0 +1,6 @@
+/*SVG loading animation*/
+
+svg path,
+svg rect{
+  fill: black;
+}
