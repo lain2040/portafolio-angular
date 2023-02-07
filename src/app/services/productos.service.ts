@@ -18,7 +18,7 @@ export class ProductosService {
     this.http.get<Producto[]>("https://portafolio-db967-default-rtdb.asia-southeast1.firebasedatabase.app/productos_idx.json")
       .subscribe((resp: Producto[])=>{
         this.productos = resp;
-        console.log(resp);
+        // console.log(resp);
 
         // Para ver si funciona el loading, no es necesario
         // setTimeout(()=>{
@@ -27,5 +27,9 @@ export class ProductosService {
 
         this.cargando=false;
       });
+  }
+
+  getProducto(id: string){
+    return this.http.get(`https://portafolio-db967-default-rtdb.asia-southeast1.firebasedatabase.app/productos/${ id }.json`)
   }
 }
