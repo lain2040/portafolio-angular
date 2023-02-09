@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { resolve } from 'dns';
 import { Producto } from '../interfaces/producto.interface';
 
 @Injectable({
@@ -8,6 +9,7 @@ import { Producto } from '../interfaces/producto.interface';
 export class ProductosService {
 
   productos: Producto[]=[];
+  productosFiltrado: Producto[]=[];
   cargando = true;
 
   constructor( private http:HttpClient) { 
@@ -15,7 +17,9 @@ export class ProductosService {
   }
 
   private  cargarProdutos(){
-    this.http.get<Producto[]>("https://portafolio-db967-default-rtdb.asia-southeast1.firebasedatabase.app/productos_idx.json")
+
+    return new Promise( ( resolve, reject ) => {
+      this.http.get<Producto[]>("https://portafolio-db967-default-rtdb.asia-southeast1.firebasedatabase.app/productos_idx.json")
       .subscribe((resp: Producto[])=>{
         this.productos = resp;
         // console.log(resp);
@@ -26,10 +30,49 @@ export class ProductosService {
         // },2000);
 
         this.cargando=false;
+        resolve;
       });
+    });
+    
   }
 
   getProducto(id: string){
     return this.http.get(`https://portafolio-db967-default-rtdb.asia-southeast1.firebasedatabase.app/productos/${ id }.json`)
+  }
+
+  buscarProducto(termino:string){
+    
+    if(this.productos.length===0){
+      //cargar productos
+      this.cargarProdutos().then(()=>{
+        //Ejecutar despues de tener los productos
+        //Aplicar filtro
+        this.filtrarProductos(termino);
+
+      });
+    }else{
+      //Aplicar filtro
+      this.filtrarProductos(termino);
+    }
+
+    // this.productosFiltrado = this.productos.filter( producto => {
+    //   return true;
+    // });
+
+    // console.log(this.productosFiltrado);
+  }
+
+  private filtrarProductos(termino:string){
+    // console.log(this.productos);
+    this.productosFiltrado=[];
+
+    termino = termino.toLowerCase();
+
+    this.productos.forEach(prod =>{
+      const tituloLower = prod.titulo.toLowerCase();
+      if (prod.categoria.indexOf( termino ) >= 0 || tituloLower.indexOf( termino )>= 0){
+          this.productosFiltrado.push(prod);
+      }
+    })
   }
 }
